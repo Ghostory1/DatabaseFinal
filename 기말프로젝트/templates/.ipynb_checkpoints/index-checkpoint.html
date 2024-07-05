@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie List</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .pagination a {
+            margin: 0 5px;
+            padding: 8px 16px;
+            text-decoration: none;
+            color: black;
+            border: 1px solid black;
+        }
+        .pagination a.active {
+            background-color: #4CAF50;
+            color: white;
+            border: 1px solid #4CAF50;
+        }
+        .pagination a:hover:not(.active) {
+            background-color: #ddd;
+        }
+        .search-container {
+            margin-bottom: 20px;
+        }
+        .search-container input,
+        .search-container select {
+            margin-right: 10px;
+            padding: 5px;
+        }
+        .search-container label {
+            margin-right: 5px;
+        }
+        .search-container .status-group,
+        .search-container .type-group,
+        .search-container .genre-group {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .search-container .status-group label,
+        .search-container .type-group label,
+        .search-container .genre-group label {
+            margin-right: 15px;
+        }
+        .indexing {
+            margin: 20px 0;
+        }
+        .indexing a {
+            margin-right: 10px;
+            text-decoration: none;
+            color: black;
+        }
+        .indexing a.active {
+            font-weight: bold;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Movie List</h1>
+    <div class="search-container">
+        <form method="GET" action="/">
+            <label for="title">영화명:</label>
+            <input type="text" id="title" name="title" value="{{ request.args.get('title', '') }}">
+            
+            <label for="director">감독명:</label>
+            <input type="text" id="director" name="director" value="{{ request.args.get('director', '') }}">
+            
+            <label for="year_start">제작연도:</label>
+            <select id="year_start" name="year_start">
+                <option value="">--전체--</option>
+                <!-- 연도 옵션 추가 -->
+                {% for year in range(1900, 2025) %}
+                <option value="{{ year }}" {% if request.args.get('year_start') == str(year) %}selected{% endif %}>{{ year }}</option>
+                {% endfor %}
+            </select>
+            ~
+            <select id="year_end" name="year_end">
+                <option value="">--전체--</option>
+                <!-- 연도 옵션 추가 -->
+                {% for year in range(1900, 2025) %}
+                <option value="{{ year }}" {% if request.args.get('year_end') == str(year) %}selected{% endif %}>{{ year }}</option>
+                {% endfor %}
+            </select>
+
+            <div class="status-group">
+                <label>제작상태:</label>
+                <label><input type="checkbox" name="status" value="전체선택" id="select_all_status"> 전체선택</label>
+                <label><input type="checkbox" name="status" value="개봉" {% if '개봉' in request.args.getlist('status') %}checked{% endif %}> 개봉</label>
+                <label><input type="checkbox" name="status" value="개봉예정" {% if '개봉예정' in request.args.getlist('status') %}checked{% endif %}> 개봉예정</label>
+                <label><input type="checkbox" name="status" value="개봉준비" {% if '개봉준비' in request.args.getlist('status') %}checked{% endif %}> 개봉준비</label>
+                <label><input type="checkbox" name="status" value="후반작업" {% if '후반작업' in request.args.getlist('status') %}checked{% endif %}> 후반작업</label>
+                <label><input type="checkbox" name="status" value="촬영진행" {% if '촬영진행' in request.args.getlist('status') %}checked{% endif %}> 촬영진행</label>
+                <label><input type="checkbox" name="status" value="촬영준비" {% if '촬영준비' in request.args.getlist('status') %}checked{% endif %}> 촬영준비</label>
+                <label><input type="checkbox" name="status" value="기타" {% if '기타' in request.args.getlist('status') %}checked{% endif %}> 기타</label>
+            </div>
+
+            <div class="type-group">
+                <label>유형:</label>
+                <label><input type="checkbox" name="m_type" value="전체선택" id="select_all_type"> 전체선택</label>
+                <label><input type="checkbox" name="m_type" value="장편" {% if '장편' in request.args.getlist('m_type') %}checked{% endif %}> 장편</label>
+                <label><input type="checkbox" name="m_type" value="단편" {% if '단편' in request.args.getlist('m_type') %}checked{% endif %}> 단편</label>
+                <label><input type="checkbox" name="m_type" value="옴니버스" {% if '옴니버스' in request.args.getlist('m_type') %}checked{% endif %}> 옴니버스</label>
+                <label><input type="checkbox" name="m_type" value="온라인전용" {% if '온라인전용' in request.args.getlist('m_type') %}checked{% endif %}> 온라인전용</label>
+                <label><input type="checkbox" name="m_type" value="기타" {% if '기타' in request.args.getlist('m_type') %}checked{% endif %}> 기타</label>
+            </div>
+
+            <div class="genre-group">
+                <label>장르:</label>
+                <label><input type="checkbox" name="genre" value="전체선택" id="select_all_genre"> 전체선택</label>
+                <label><input type="checkbox" name="genre" value="드라마" {% if '드라마' in request.args.getlist('genre') %}checked{% endif %}> 드라마</label>
+                <label><input type="checkbox" name="genre" value="코미디" {% if '코미디' in request.args.getlist('genre') %}checked{% endif %}> 코미디</label>
+                <label><input type="checkbox" name="genre" value="액션" {% if '액션' in request.args.getlist('genre') %}checked{% endif %}> 액션</label>
+                <label><input type="checkbox" name="genre" value="멜로/로멘스" {% if '멜로/로멘스' in request.args.getlist('genre') %}checked{% endif %}> 멜로/로멘스</label>
+                <label><input type="checkbox" name="genre" value="스릴러" {% if '스릴러' in request.args.getlist('genre') %}checked{% endif %}> 스릴러</label>
+                <label><input type="checkbox" name="genre" value="미스터리" {% if '미스터리' in request.args.getlist('genre') %}checked{% endif %}> 미스터리</label>
+                <label><input type="checkbox" name="genre" value="공포(호러)" {% if '공포(호러)' in request.args.getlist('genre') %}checked{% endif %}> 공포(호러)</label>
+                <label><input type="checkbox" name="genre" value="어드벤처" {% if '어드벤처' in request.args.getlist('genre') %}checked{% endif %}> 어드벤처</label>
+                <label><input type="checkbox" name="genre" value="범죄" {% if '범죄' in request.args.getlist('genre') %}checked{% endif %}> 범죄</label>
+                <label><input type="checkbox" name="genre" value="가족" {% if '가족' in request.args.getlist('genre') %}checked{% endif %}> 가족</label>
+                <label><input type="checkbox" name="genre" value="판타지" {% if '판타지' in request.args.getlist('genre') %}checked{% endif %}> 판타지</label>
+                <label><input type="checkbox" name="genre" value="SF" {% if 'SF' in request.args.getlist('genre') %}checked{% endif %}> SF</label>
+                <label><input type="checkbox" name="genre" value="서부극(웨스턴)" {% if '서부극(웨스턴)' in request.args.getlist('genre') %}checked{% endif %}> 서부극(웨스턴)</label>
+                <label><input type="checkbox" name="genre" value="사극" {% if '사극' in request.args.getlist('genre') %}checked{% endif %}> 사극</label>
+                <label><input type="checkbox" name="genre" value="애니메이션" {% if '애니메이션' in request.args.getlist('genre') %}checked{% endif %}> 애니메이션</label>
+                <label><input type="checkbox" name="genre" value="다큐멘터리" {% if '다큐멘터리' in request.args.getlist('genre') %}checked{% endif %}> 다큐멘터리</label>
+                <label><input type="checkbox" name="genre" value="전쟁" {% if '전쟁' in request.args.getlist('genre') %}checked{% endif %}> 전쟁</label>
+                <label><input type="checkbox" name="genre" value="뮤지컬" {% if '뮤지컬' in request.args.getlist('genre') %}checked{% endif %}> 뮤지컬</label>
+                <label><input type="checkbox" name="genre" value="성인물(에로)" {% if '성인물(에로)' in request.args.getlist('genre') %}checked{% endif %}> 성인물(에로)</label>
+                <label><input type="checkbox" name="genre" value="공연" {% if '공연' in request.args.getlist('genre') %}checked{% endif %}> 공연</label>
+                <label><input type="checkbox" name="genre" value="기타" {% if '기타' in request.args.getlist('genre') %}checked{% endif %}> 기타</label>
+            </div>
+
+            <button type="submit">조회</button>
+            <button type="button" onclick="window.location.href='/'">초기화</button>
+        </form>
+    </div>
+
+    <div class="indexing">
+        <label>영화명 인덱싱:</label>
+        {% for char in 'ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎABCDEFGHIJKLMNOPQRSTUVWXYZ' %}
+            <a href="{{ url_for('home', index=char, title=request.args.get('title', ''), director=request.args.get('director', ''), year_start=request.args.get('year_start', ''), year_end=request.args.get('year_end', ''), status=request.args.getlist('status'), m_type=request.args.getlist('m_type'), genre=request.args.getlist('genre')) }}" class="{{ 'active' if request.args.get('index') == char else '' }}">{{ char }}</a>
+        {% endfor %}
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>영화명</th>
+                <th>영화명(영문)</th>
+                <th>제작연도</th>
+                <th>제작국가</th>
+                <th>유형</th>
+                <th>장르</th>
+                <th>제작상태</th>
+                <th>감독</th>
+                <th>제작사</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for movie in movies %}
+            <tr>
+                <td>{{ movie.title }}</td>
+                <td>{{ movie.eng_title }}</td>
+                <td>{{ movie.year }}</td>
+                <td>{{ movie.country }}</td>
+                <td>{{ movie.m_type }}</td>
+                <td>{{ movie.genre }}</td>
+                <td>{{ movie.status }}</td>
+                <td>{{ movie.director }}</td>
+                <td>{{ movie.company }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- 페이징 기능 -->
+    <div class="pagination">
+        {% if page > 1 %}
+        <a href="{{ url_for('home', page=1, title=request.args.get('title', ''), director=request.args.get('director', ''), year_start=request.args.get('year_start', ''), year_end=request.args.get('year_end', ''), status=request.args.getlist('status'), m_type=request.args.getlist('m_type'), genre=request.args.getlist('genre'), index=request.args.get('index', '')) }}">&laquo;&laquo;</a>
+        <a href="{{ url_for('home', page=page-1, title=request.args.get('title', ''), director=request.args.get('director', ''), year_start=request.args.get('year_start', ''), year_end=request.args.get('year_end', ''), status=request.args.getlist('status'), m_type=request.args.getlist('m_type'), genre=request.args.getlist('genre'), index=request.args.get('index', '')) }}">&laquo;</a>
+        {% endif %}
+        {% for p in range(max(1, page - 5), min(total_pages + 1, page + 6)) %}
+        <a href="{{ url_for('home', page=p, title=request.args.get('title', ''), director=request.args.get('director', ''), year_start=request.args.get('year_start', ''), year_end=request.args.get('year_end', ''), status=request.args.getlist('status'), m_type=request.args.getlist('m_type'), genre=request.args.getlist('genre'), index=request.args.get('index', '')) }}" class="{{ 'active' if p == page else '' }}">{{ p }}</a>
+        {% endfor %}
+        {% if page < total_pages %}
+        <a href="{{ url_for('home', page=page+1, title=request.args.get('title', ''), director=request.args.get('director', ''), year_start=request.args.get('year_start', ''), year_end=request.args.get('year_end', ''), status=request.args.getlist('status'), m_type=request.args.getlist('m_type'), genre=request.args.getlist('genre'), index=request.args.get('index', '')) }}">&raquo;</a>
+        <a href="{{ url_for('home', page=total_pages, title=request.args.get('title', ''), director=request.args.get('director', ''), year_start=request.args.get('year_start', ''), year_end=request.args.get('year_end', ''), status=request.args.getlist('status'), m_type=request.args.getlist('m_type'), genre=request.args.getlist('genre'), index=request.args.get('index', '')) }}">&raquo;&raquo;</a>
+        {% endif %}
+    </div>
+
+    <script>
+        document.getElementById('select_all_status').onclick = function() {
+            var checkboxes = document.getElementsByName('status');
+            for (var checkbox of checkboxes) {
+                checkbox.checked = this.checked;
+            }
+        }
+
+        document.getElementById('select_all_type').onclick = function() {
+            var checkboxes = document.getElementsByName('m_type');
+            for (var checkbox of checkboxes) {
+                checkbox.checked = this.checked;
+            }
+        }
+
+        document.getElementById('select_all_genre').onclick = function() {
+            var checkboxes = document.getElementsByName('genre');
+            for (var checkbox of checkboxes) {
+                checkbox.checked = this.checked;
+            }
+        }
+    </script>
+</body>
+</html>
+
